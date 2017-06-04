@@ -10,23 +10,23 @@
 
 # Detect Debian users running the script with "sh" instead of bash
 if readlink /proc/$$/exe | grep -qs "dash"; then
-	echo "This script needs to be run with bash, not sh"
+	echo "Necesita ejecutar este script con bash, no sh"
 	exit 1
 fi
 
 if [[ "$EUID" -ne 0 ]]; then
-	echo "Sorry, you need to run this as root"
+	echo "Necesita ejecutar este script como root"
 	exit 2
 fi
 
 if [[ ! -e /dev/net/tun ]]; then
-	echo "The TUN device is not available
-You need to enable TUN before running this script"
+	echo "El dispositivo TUN no está disponible 
+Necesita habilitar TUN antes de ejecutar este script"
 	exit 3
 fi
 
 if grep -qs "CentOS release 5" "/etc/redhat-release"; then
-	echo "CentOS 5 is too old and not supported"
+	echo "CentOS 5 no está soportado"
 	exit 4
 fi
 if [[ -e /etc/debian_version ]]; then
@@ -38,7 +38,7 @@ elif [[ -e /etc/centos-release || -e /etc/redhat-release ]]; then
 	GROUPNAME=nobody
 	RCLOCAL='/etc/rc.d/rc.local'
 else
-	echo "Looks like you aren't running this installer on Debian, Ubuntu or CentOS"
+	echo "Parece que está distribución no es Debian, Ubuntu o CentOS"
 	exit 5
 fi
 
@@ -71,26 +71,23 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	while :
 	do
 	clear
-		echo "Looks like OpenVPN is already installed"
+		echo "Parece que OpenVPN ya está instalado"
 		echo ""
-		echo "What do you want to do?"
-		echo "   1) Add a new user"
-		echo "   2) Revoke an existing user"
-		echo "   3) Remove OpenVPN"
-		echo "   4) Exit"
-		read -p "Select an option [1-4]: " option
+		echo "   1) Agregar nuevo usuario"
+		echo "   2) Revocar un usuario existente"
+		echo "   3) Desinstalar OpenVPN"
+		echo "   4) Salir"
+		read -p "Seleccione una opción [1-4]: " option
 		case $option in
 			1) 
 			echo ""
-			echo "Tell me a name for the client certificate"
-			echo "Please, use one word only, no special characters"
-			read -p "Client name: " -e -i client CLIENT
+			read -p "Nombre del cliente (Una sóla palabra sin caracteres especiales): " -e -i client CLIENT
 			cd /etc/openvpn/easy-rsa/
 			./easyrsa build-client-full $CLIENT nopass
 			# Generates the custom client.ovpn
 			newclient "$CLIENT"
 			echo ""
-			echo "Client $CLIENT added, configuration is available at" ~/"$CLIENT.ovpn"
+			echo "Cliente $CLIENT agregado. El certificado está disponible en " ~/"$CLIENT.ovpn"
 			exit
 			;;
 			2)
@@ -99,16 +96,16 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			NUMBEROFCLIENTS=$(tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep -c "^V")
 			if [[ "$NUMBEROFCLIENTS" = '0' ]]; then
 				echo ""
-				echo "You have no existing clients!"
+				echo "No hay clientes existentes!"
 				exit 6
 			fi
 			echo ""
-			echo "Select the existing client certificate you want to revoke"
+			echo "Seleccione el certificado del cliente que desea revocar"
 			tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | nl -s ') '
 			if [[ "$NUMBEROFCLIENTS" = '1' ]]; then
-				read -p "Select one client [1]: " CLIENTNUMBER
+				read -p "Seleccione un cliente [1]: " CLIENTNUMBER
 			else
-				read -p "Select one client [1-$NUMBEROFCLIENTS]: " CLIENTNUMBER
+				read -p "Seleccione un cliente [1-$NUMBEROFCLIENTS]: " CLIENTNUMBER
 			fi
 			CLIENT=$(tail -n +2 /etc/openvpn/easy-rsa/pki/index.txt | grep "^V" | cut -d '=' -f 2 | sed -n "$CLIENTNUMBER"p)
 			cd /etc/openvpn/easy-rsa/
@@ -122,12 +119,12 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 			# CRL is read with each client connection, when OpenVPN is dropped to nobody
 			chown nobody:$GROUPNAME /etc/openvpn/crl.pem
 			echo ""
-			echo "Certificate for client $CLIENT revoked"
+			echo "Certificado para el $CLIENT revocado!"
 			exit
 			;;
 			3) 
 			echo ""
-			read -p "Do you really want to remove OpenVPN? [y/n]: " -e -i n REMOVE
+			read -p "Realmente desea desinstalar OpenVPN? [y/n]: " -e -i n REMOVE
 			if [[ "$REMOVE" = 'y' ]]; then
 				PORT=$(grep '^port ' /etc/openvpn/server.conf | cut -d " " -f 2)
 				PROTOCOL=$(grep '^proto ' /etc/openvpn/server.conf | cut -d " " -f 2)
@@ -167,10 +164,10 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 				rm -rf /etc/openvpn
 				rm -rf /usr/share/doc/openvpn*
 				echo ""
-				echo "OpenVPN removed!"
+				echo "OpenVPN desinstalado!"
 			else
 				echo ""
-				echo "Removal aborted!"
+				echo "Desinstalación cancelada!"
 			fi
 			exit
 			;;
@@ -179,20 +176,14 @@ if [[ -e /etc/openvpn/server.conf ]]; then
 	done
 else
 	clear
-	echo 'Welcome to this quick OpenVPN "road warrior" installer'
 	echo ""
 	# OpenVPN setup and first user creation
-	echo "I need to ask you a few questions before starting the setup"
-	echo "You can leave the default options and just press enter if you are ok with them"
+	read -p "Dirección IPv4 de la interface de red en la cual escuchar OpenVPN: " -e -i $IP IP
 	echo ""
-	echo "First I need to know the IPv4 address of the network interface you want OpenVPN"
-	echo "listening to."
-	read -p "IP address: " -e -i $IP IP
-	echo ""
-	echo "Which protocol do you want for OpenVPN connections?"
-	echo "   1) UDP (recommended)"
+	echo "Protocolo a usar para las conexiones de OpenVPN?"
+	echo "   1) UDP (recomendado)"
 	echo "   2) TCP"
-	read -p "Protocol [1-2]: " -e -i 1 PROTOCOL
+	read -p "Protocolo [1-2]: " -e -i 1 PROTOCOL
 	case $PROTOCOL in
 		1) 
 		PROTOCOL=udp
@@ -202,16 +193,12 @@ else
 		;;
 	esac
 	echo ""
-	echo "What port do you want OpenVPN listening to?"
-	read -p "Port: " -e -i 1194 PORT
+	read -p "Puerto para OpenVPN?: " -e -i 1194 PORT
 	echo ""      
         
-	echo "Finally, tell me your name for the client certificate"
-	echo "Please, use one word only, no special characters"
-	read -p "Client name: " -e -i client CLIENT
-	echo ""
-	echo "Okay, that was all I needed. We are ready to setup your OpenVPN server now"
-	read -n1 -r -p "Press any key to continue..."
+	read -p "Nombre del cliente (Una sóla palabra sin caracteres especiales): " -e -i client CLIENT
+	echo ""       
+	read -n1 -r -p "Presione cualquiera tecla para continuar..."
 	if [[ "$OS" = 'debian' ]]; then
 		apt-get update
 		apt-get install openvpn iptables openssl ca-certificates -y
@@ -375,6 +362,6 @@ verb 3" > /etc/openvpn/client-common.txt
 	echo ""
 	echo "Finished!"
 	echo ""
-	echo "Your client configuration is available at" ~/"$CLIENT.ovpn"
-	echo "If you want to add more clients, you simply need to run this script again!"
+	echo "El certificado está disponible en " ~/"$CLIENT.ovpn"
+	echo "Si quieres agregar más clientes, solo ejecuta este script otra vez!"
 fi
