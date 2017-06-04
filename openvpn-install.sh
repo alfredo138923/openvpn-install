@@ -204,16 +204,8 @@ else
 	echo ""
 	echo "What port do you want OpenVPN listening to?"
 	read -p "Port: " -e -i 1194 PORT
-	echo ""
-	echo "Which DNS do you want to use with the VPN?"
-	echo "   1) Current system resolvers"
-	echo "   2) Google"
-	echo "   3) OpenDNS"
-	echo "   4) NTT"
-	echo "   5) Hurricane Electric"
-	echo "   6) Verisign"
-	read -p "DNS [1-6]: " -e -i 1 DNS
-	echo ""
+	echo ""      
+        
 	echo "Finally, tell me your name for the client certificate"
 	echo "Please, use one word only, no special characters"
 	read -p "Client name: " -e -i client CLIENT
