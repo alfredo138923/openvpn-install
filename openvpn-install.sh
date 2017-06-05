@@ -327,9 +327,9 @@ exit 0' > $RCLOCAL
 		echo ""
 		echo "Looks like your server is behind a NAT!"
 		echo ""
-		echo "If your server is NATed (e.g. LowEndSpirit), I need to know the external IP"
-		echo "If that's not the case, just ignore this and leave the next field blank"
-		read -p "External IP: " -e USEREXTERNALIP
+		echo "Parece que el servidor está bajo una NAT (AWS ?)"
+		echo "Si el caso ingrese la IP externa caso contrario omite este paso"
+		read -p "IP Externa: " -e USEREXTERNALIP
 		if [[ "$USEREXTERNALIP" != "" ]]; then
 			IP=$USEREXTERNALIP
 		fi
@@ -354,8 +354,6 @@ key-direction 1
 verb 3" > /etc/openvpn/client-common.txt
 	# Generates the custom client.ovpn
 	newclient "$CLIENT"
-	echo ""
-	echo "Finished!"
 	echo ""
 	echo "El certificado está disponible en " ~/"$CLIENT.ovpn"
 	echo "Si quieres agregar más clientes, solo ejecuta este script otra vez!"
