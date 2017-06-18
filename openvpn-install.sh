@@ -15,7 +15,7 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 if [[ ! -e /dev/net/tun ]]; then
-	echo "El dispositivo TUN no está disponible 
+	echo "El dispositivo TUN no está disponible. 
 Necesita habilitar TUN antes de ejecutar este script"
 	exit 3
 fi
@@ -325,10 +325,8 @@ exit 0' > $RCLOCAL
 	EXTERNALIP=$(wget -4qO- "http://whatismyip.akamai.com/")
 	if [[ "$IP" != "$EXTERNALIP" ]]; then
 		echo ""
-		echo "Looks like your server is behind a NAT!"
-		echo ""
 		echo "Parece que el servidor está bajo una NAT (AWS ?)"
-		echo "Si el caso ingrese la IP externa caso contrario omite este paso"
+		echo "Si el caso, ingrese la IP externa caso contrario omita este paso"
 		read -p "IP Externa: " -e USEREXTERNALIP
 		if [[ "$USEREXTERNALIP" != "" ]]; then
 			IP=$USEREXTERNALIP
